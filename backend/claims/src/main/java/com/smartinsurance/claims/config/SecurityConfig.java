@@ -30,25 +30,23 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Public endpoints
                         .requestMatchers(
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login"
                         ).permitAll()
 
-                        // Administrator endpoints
                         .requestMatchers("/api/v1/admin/**")
                         .hasRole("ADMIN")
 
-                        // Customer policy endpoints
                         .requestMatchers("/api/v1/policies/**")
                         .hasRole("CUSTOMER")
 
-                        // Products can be viewed by authenticated users
+                        .requestMatchers("/api/v1/payments/**")
+                        .hasRole("CUSTOMER")
+
                         .requestMatchers("/api/v1/products/**")
                         .authenticated()
 
-                        // Everything else requires authentication
                         .anyRequest()
                         .authenticated()
                 )
