@@ -8,6 +8,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -20,6 +25,12 @@ public class SecurityConfig {
             HttpSecurity http) throws Exception {
 
         http
+                .cors(cors ->
+                        cors.configurationSource(
+                                corsConfigurationSource()
+                        )
+                )
+
                 .csrf(csrf -> csrf.disable())
 
                 .sessionManagement(session ->
@@ -30,32 +41,26 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Public authentication APIs
                         .requestMatchers(
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login"
                         ).permitAll()
 
-                        // Swagger / OpenAPI
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
 
-                        // Administrator
                         .requestMatchers("/api/v1/admin/**")
                         .hasRole("ADMIN")
 
-                        // Claims Officer
                         .requestMatchers("/api/v1/officer/**")
                         .hasRole("CLAIMS_OFFICER")
 
-                        // Agent
                         .requestMatchers("/api/v1/agent/**")
                         .hasRole("AGENT")
 
-                        // Customer
                         .requestMatchers("/api/v1/policies/**")
                         .hasRole("CUSTOMER")
 
@@ -65,7 +70,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/claims/**")
                         .hasRole("CUSTOMER")
 
-                        // Shared authenticated catalog
                         .requestMatchers("/api/v1/products/**")
                         .authenticated()
 
@@ -79,5 +83,52 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration =
+                new CorsConfiguration();
+
+        configuration.setAllowedOrigins(
+                List.of("http://localhost:5173")
+        );
+
+        configuration.setAllowedMethods(
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE",
+                        "OPTIONS"
+                )
+        );
+
+        configuration.setAllowedHeaders(
+                List.of(
+                        "Authorization",
+                        "Content-Type"
+                )
+        );
+
+        configuration.setExposedHeaders(
+                List.of(
+                        "Content-Disposition"
+                )
+        );
+
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration(
+                "/**",
+                configuration
+        );
+
+        return source;
     }
 }
