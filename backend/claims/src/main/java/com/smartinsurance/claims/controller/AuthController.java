@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.smartinsurance.claims.dto.LoginRequest;
+import com.smartinsurance.claims.dto.LoginResponse;
+import com.smartinsurance.claims.service.AuthenticationService;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final RegistrationService registrationService;
+    private final AuthenticationService authenticationService;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(
@@ -26,4 +30,12 @@ public class AuthController {
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
+    @PostMapping("/login")
+public ResponseEntity<LoginResponse> login(
+        @Valid @RequestBody LoginRequest request) {
+
+    return ResponseEntity.ok(
+            authenticationService.login(request)
+    );
+}
 }
