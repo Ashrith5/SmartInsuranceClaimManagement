@@ -16,8 +16,8 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http) throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
@@ -30,20 +30,42 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
+                        // Public authentication APIs
                         .requestMatchers(
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login"
                         ).permitAll()
 
+                        // Swagger / OpenAPI
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+
+                        // Administrator
                         .requestMatchers("/api/v1/admin/**")
                         .hasRole("ADMIN")
 
+                        // Claims Officer
+                        .requestMatchers("/api/v1/officer/**")
+                        .hasRole("CLAIMS_OFFICER")
+
+                        // Agent
+                        .requestMatchers("/api/v1/agent/**")
+                        .hasRole("AGENT")
+
+                        // Customer
                         .requestMatchers("/api/v1/policies/**")
                         .hasRole("CUSTOMER")
 
                         .requestMatchers("/api/v1/payments/**")
                         .hasRole("CUSTOMER")
 
+                        .requestMatchers("/api/v1/claims/**")
+                        .hasRole("CUSTOMER")
+
+                        // Shared authenticated catalog
                         .requestMatchers("/api/v1/products/**")
                         .authenticated()
 
