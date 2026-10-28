@@ -1,0 +1,63 @@
+services:
+
+  database:
+    image: postgres:18-alpine
+    container_name: smart-insurance-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: smart_insurance_claims
+      POSTGRES_USER: insurance_app
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U insurance_app -d smart_insurance_claims
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend/claims
+
+    container_name: smart-insurance-backend
+    restart: unless-stopped
+
+    environment:
+      DB_URL: jdbc:postgresql://database:5432/smart_insurance_claims
+      DB_USERNAME: insurance_app
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      CLAIMS_UPLOAD_DIRECTORY: /app/uploads/claims
+
+    depends_on:
+      database:
+        condition: service_healthy
+
+    volumes:
+      - claim_uploads:/app/uploads/claims
+
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+
+    container_name: smart-insurance-frontend
+    restart: unless-stopped
+
+    depends_on:
+      - backend
+
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
+  claim_uploads:
