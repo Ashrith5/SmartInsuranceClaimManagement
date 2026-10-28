@@ -1,0 +1,15 @@
+aws_region        = "ap-south-1"
+environment       = "dev"
+project_name      = "smart-insurance"
+
+instance_type     = "t3.micro"
+db_instance_class = "db.t3.micro"
+
+db_name     = "smart_insurance_claims"
+db_username = "insurance_app"
+
+# Supply real sensitive values through environment variables
+# or an untracked terraform.tfvars file.
+#
+# db_password = "CHANGE_ME"
+# jwt_secret  = "CHANGE_ME"
